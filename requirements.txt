@@ -10,7 +10,8 @@ chardet==3.0.4
 Click==7.0
 colorama==0.3.7
 colorzero==1.1
-configparser==3.5.0b2
+# Backport not needed on modern Python; old versions break on newer interpreters.
+configparser>=5.3.0; python_version < '3.8'
 cookies==2.2.1
 cryptography
 cycler==0.10.0
@@ -74,7 +75,7 @@ scrollphat==0.0.7
 scrollphathd==1.2.1
 SecretStorage==2.3.1
 sense-hat==2.2.0
-setuptools==40.8.0
+setuptools>=65.0.0
 simplejson==3.16.0
 six==1.12.0
 skywriter==0.0.7
@@ -87,4 +88,4 @@ twython==3.7.0
 unicornhathd==0.0.4
 urllib3==1.24.1
 Werkzeug==0.14.1
-wheel==0.32.3
+wheel>=0.41.0
