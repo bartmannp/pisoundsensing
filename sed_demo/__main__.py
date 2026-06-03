@@ -321,6 +321,7 @@ CORS(app)
 
 file_path = '/var/www/html/sound_datalog.json'
 short_file_path = '/var/www/html/sound_datalog_short.json'
+web_config_path = '/var/www/html/pisoundsensing_config.json'
 CONF = OmegaConf.structured(ConfDef())
 cli_conf = OmegaConf.from_cli()
 CONF = OmegaConf.merge(CONF, cli_conf)
@@ -382,8 +383,28 @@ def update_config():
         json.dump(data, f, indent=4)
     return jsonify({"message": "Configuration updated successfully"}), 200
 
+def get_backend_port(default_port=5000):
+    env_port = os.getenv('BACKEND_PORT')
+    if env_port:
+        try:
+            return int(env_port)
+        except ValueError:
+            print(f"Invalid BACKEND_PORT value '{env_port}', using {default_port}.")
+
+    if os.path.exists(web_config_path):
+        try:
+            with open(web_config_path, 'r', encoding='utf-8') as f:
+                cfg = json.load(f)
+            return int(cfg.get('backend_port', default_port))
+        except (ValueError, TypeError, json.JSONDecodeError) as exc:
+            print(f"Invalid web config in {web_config_path}: {exc}. Using {default_port}.")
+
+    return default_port
+
 def run_flask_app():
-    app.run(host='0.0.0.0', port=5000)
+    backend_port = get_backend_port()
+    print(f"Starting Flask server on port {backend_port}")
+    app.run(host='0.0.0.0', port=backend_port)
 
 # ##############################################################################
 # # MAIN ROUTINE

@@ -88,7 +88,7 @@ Paper: https://arxiv.org/abs/2306.09106
 
 #### 3. Create User: 
 
-* Enter the username `ai4s`. 
+* Create your preferred username (for example `pi`). 
 
 * It's advisable to change the default password for security purposes. Enter a new password and confirm it, then click "Next". 
 
@@ -128,6 +128,14 @@ wget https://github.com/gbibbo/pisoundsensing/raw/main/setup.sh
 ```bash
 bash setup.sh 
 ```
+
+#### Optional: Use a custom backend port
+
+By default, the backend runs on port `5000`. To change it at install time:
+
+```bash
+BACKEND_PORT=5050 bash setup.sh
+```
 #### 3. During the Process: 
 
 * Stay attentive to the terminal. You will be asked to confirm the installation of some packages. When this happens, type `Y` and press `Enter` to continue. 
@@ -140,6 +148,6 @@ bash setup.sh
 
 * On a computer connected to the same WiFi network, open a web browser. 
 
-* Enter the address `piss.local` in the address bar. 
+* Enter your Raspberry Pi hostname in the address bar, e.g. `http://<hostname>.local`. 
 
 * You should now be able to see and access the graphical interface of the device and start using the installed software. 

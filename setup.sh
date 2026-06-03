@@ -1,82 +1,99 @@
-# Instructions for using the script:
-
-# Save this code in a file named setup.sh.
-# Give it execute permissions with the command: chmod +x setup.sh.
-# Run the script with: bash ./setup.sh.
-
 #!/bin/bash
+
+# Instructions for using the script:
+# Give it execute permissions with: chmod +x setup.sh
+# Run with: bash ./setup.sh
+
+set -euo pipefail
+
+# Detect the real target user even if this script is run with sudo.
+TARGET_USER="${SUDO_USER:-$USER}"
+TARGET_GROUP="$(id -gn "$TARGET_USER")"
+TARGET_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
+
+if [[ -z "$TARGET_HOME" ]]; then
+	echo "Could not detect home directory for user '$TARGET_USER'."
+	exit 1
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# Use current repository folder if setup.sh lives inside it.
+if [[ -f "$SCRIPT_DIR/requirements.txt" && -f "$SCRIPT_DIR/index.html" && -d "$SCRIPT_DIR/sed_demo" ]]; then
+	REPO_DIR="$SCRIPT_DIR"
+else
+	REPO_DIR="$TARGET_HOME/pisoundsensing"
+	if [[ ! -d "$REPO_DIR" ]]; then
+		git clone https://github.com/bartmannp/pisoundsensing.git "$REPO_DIR"
+	fi
+fi
+
+AUTOSTART_DIR="$TARGET_HOME/.config/autostart"
+BACKEND_PORT="${BACKEND_PORT:-5000}"
+
+echo "Using user: $TARGET_USER"
+echo "Using repository folder: $REPO_DIR"
+echo "Using backend port: $BACKEND_PORT"
 
 # Upgrade system packages
 sudo apt-get update
 sudo apt-get upgrade -y
 
 # Install dependencies
-sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev libcairo2-dev libgirepository1.0-dev python3-cryptography cython3 python3-numpy python3-pil python3-gi python3-gi-cairo gir1.2-gtk-3.0 libglib2.0-dev gcc pkg-config arandr python3-pygame portaudio19-dev python3-pil.imagetk libttspico-utils apache2 php avahi-daemon
-sudo apt install python3-torch
-sudo apt install python3-omegaconf
-sudo apt install python3-pyaudio
-sudo apt-get install python3-flask-cors
-pip3 install --upgrade pip --break-system-packages
-pip3 install librosa --break-system-packages
-pip3 install pyttsx3 --break-system-packages
+sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev libcairo2-dev libgirepository1.0-dev python3-cryptography cython3 python3-numpy python3-pil python3-gi python3-gi-cairo gir1.2-gtk-3.0 libglib2.0-dev gcc pkg-config arandr python3-pygame portaudio19-dev python3-pil.imagetk libttspico-utils apache2 php avahi-daemon python3-torch python3-omegaconf python3-pyaudio python3-flask-cors
 
-# Cloning GitHub repository
-git clone https://github.com/gbibbo/pisoundsensing.git
+python3 -m pip install --upgrade pip --break-system-packages
+python3 -m pip install librosa --break-system-packages
+python3 -m pip install pyttsx3 --break-system-packages
 
-# Change to the cloned directory
-cd pisoundsensing
+cd "$REPO_DIR"
 
 # Update pip and setuptools
-pip3 install --upgrade pip setuptools wheel
+python3 -m pip install --upgrade pip setuptools wheel --break-system-packages
 
 # Install Flask and additional dependencies
-pip3 install Flask Flask-CORS pycairo PyGObject
+python3 -m pip install Flask Flask-CORS pycairo PyGObject --break-system-packages
 
 # Install requirements from file
-pip3 install -r requirements.txt
-pip3 install --upgrade colorama
+python3 -m pip install -r requirements.txt --break-system-packages
+python3 -m pip install --upgrade colorama --break-system-packages
 
-# Download .pth file
-wget https://zenodo.org/record/3576599/files/Cnn9_GMP_64x64_300000_iterations_mAP%3D0.37.pth?download=1
+# Download .pth file if missing
+MODEL_FILE="Cnn9_GMP_64x64_300000_iterations_mAP=0.37.pth"
+if [[ ! -f "$MODEL_FILE" ]]; then
+	wget -O "$MODEL_FILE" "https://zenodo.org/record/3576599/files/Cnn9_GMP_64x64_300000_iterations_mAP%3D0.37.pth?download=1"
+fi
 
-# Copy and configure index.html file
-sudo cp index.html /var/www/html/index.html
-sudo chown ai4s:ai4s /var/www/html/index.html
-sudo chmod 644 /var/www/html/index.html
+# Copy and configure web files
+sudo cp "$REPO_DIR/index.html" /var/www/html/index.html
+sudo cp "$REPO_DIR/sed_demo/assets/logo.png" /var/www/html/logo.png
 
-# Set permissions for /var/www/html folder
-sudo chown -R ai4s:ai4s /var/www/html/
+# Shared runtime config consumed by the frontend and Flask app.
+printf '%s\n' "{\"backend_port\": $BACKEND_PORT}" | sudo tee /var/www/html/pisoundsensing_config.json >/dev/null
+
+sudo chown "$TARGET_USER:$TARGET_GROUP" /var/www/html/index.html /var/www/html/logo.png
+sudo chown "$TARGET_USER:$TARGET_GROUP" /var/www/html/pisoundsensing_config.json
+sudo chmod 644 /var/www/html/index.html /var/www/html/logo.png /var/www/html/pisoundsensing_config.json
+sudo chown -R "$TARGET_USER:$TARGET_GROUP" /var/www/html/
 sudo chmod -R 775 /var/www/html/
 
-# Configuring Python scripts for auto-starting
-mkdir -p ~/.config/autostart
+# Configure autostart for the detected user/home
+mkdir -p "$AUTOSTART_DIR"
 
-# Copying and giving execution permissions to scripts
-# sudo cp temperature.py run_sed_demo.sh /usr/local/bin/
-sudo chown ai4s:ai4s /home/ai4s/pisoundsensing/temperature.py /home/ai4s/pisoundsensing/run_sed_demo.sh
-sudo chmod +x /home/ai4s/pisoundsensing/temperature.py /home/ai4s/pisoundsensing/run_sed_demo.sh
+sudo chown "$TARGET_USER:$TARGET_GROUP" "$REPO_DIR/temperature.py" "$REPO_DIR/run_sed_demo.sh"
+sudo chmod +x "$REPO_DIR/temperature.py" "$REPO_DIR/run_sed_demo.sh"
 
-# Create autostart files
-echo -e "[Desktop Entry]\nType=Application\nName=Run Temperature\nExec=python3 /home/ai4s/pisoundsensing/temperature.py" > ~/.config/autostart/run_temperature.desktop
-echo -e "[Desktop Entry]\nType=Application\nName=Run sed_demo\nExec=/home/ai4s/pisoundsensing/run_sed_demo.sh" > ~/.config/autostart/run_sed_demo.desktop
+printf '%s\n' "[Desktop Entry]" "Type=Application" "Name=Run Temperature" "Exec=python3 $REPO_DIR/temperature.py" > "$AUTOSTART_DIR/run_temperature.desktop"
 
-# Set ownership and permissions of autostart files
-sudo chown ai4s:ai4s ~/.config/autostart/run_temperature.desktop ~/.config/autostart/run_sed_demo.desktop
-sudo chmod 644 ~/.config/autostart/*.desktop
+printf '%s\n' "[Desktop Entry]" "Type=Application" "Name=Run sed_demo" "Exec=$REPO_DIR/run_sed_demo.sh" > "$AUTOSTART_DIR/run_sed_demo.desktop"
 
-# Move logo to public folder and set permissions
-sudo cp sed_demo/assets/logo.png /var/www/html/logo.png
-sudo chown ai4s:ai4s /var/www/html/logo.png
-sudo chmod 644 /var/www/html/logo.png
+sudo chown "$TARGET_USER:$TARGET_GROUP" "$AUTOSTART_DIR/run_temperature.desktop" "$AUTOSTART_DIR/run_sed_demo.desktop"
+sudo chmod 644 "$AUTOSTART_DIR"/*.desktop
 
-# Ensure that the state.json file and other generated files are editable.
-touch /home/ai4s/pisoundsensing/state.json
-sudo chown ai4s:ai4s /home/ai4s/pisoundsensing/state.json
-sudo chmod 666 /home/ai4s/pisoundsensing/state.json
-
-# Change hostname
-echo "piss" | sudo tee /etc/hostname
-sudo sed -i 's/127.0.1.1.*/127.0.1.1\tpiss/g' /etc/hosts
+# Ensure generated files are editable.
+touch "$REPO_DIR/state.json"
+sudo chown "$TARGET_USER:$TARGET_GROUP" "$REPO_DIR/state.json"
+sudo chmod 666 "$REPO_DIR/state.json"
 
 # Reboot the system
 sudo reboot
