@@ -14,7 +14,8 @@ colorzero==1.1
 configparser>=5.3.0; python_version < '3.8'
 cookies==2.2.1
 cryptography
-cycler==0.10.0
+cycler==0.10.0; python_version < '3.8'
+cycler>=0.11.0; python_version >= '3.8'
 Cython
 drumhat==0.1.0
 entrypoints==0.3
@@ -31,10 +32,12 @@ itsdangerous==0.24
 Jinja2==2.10
 keyring==17.1.1
 keyrings.alt==3.1.1
-kiwisolver==1.1.0
+kiwisolver==1.1.0; python_version < '3.8'
+kiwisolver>=1.4.5; python_version >= '3.8'
 librosa
 MarkupSafe==1.1.0
-matplotlib==2.2.5
+matplotlib==2.2.5; python_version < '3.8'
+matplotlib>=3.7.0,<3.10; python_version >= '3.8'
 microdotphat==0.2.1
 mock==2.0.0
 mote==0.0.4
@@ -59,7 +62,8 @@ PyGObject
 pyinotify==0.9.6
 PyJWT==1.7.0
 pyOpenSSL==19.0.0
-pyparsing==2.4.7
+pyparsing==2.4.7; python_version < '3.8'
+pyparsing>=3.1.2; python_version >= '3.8'
 pyserial==3.4
 python-dateutil==2.8.2
 pyttsx3==2.7
