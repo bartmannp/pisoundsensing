@@ -10,12 +10,10 @@ chardet==3.0.4
 Click==7.0
 colorama==0.3.7
 colorzero==1.1
-# Backport not needed on modern Python; old versions break on newer interpreters.
-configparser>=5.3.0; python_version < '3.8'
+configparser==3.5.0b2
 cookies==2.2.1
 cryptography
-cycler==0.10.0; python_version < '3.8'
-cycler>=0.11.0; python_version >= '3.8'
+cycler==0.10.0
 Cython
 drumhat==0.1.0
 entrypoints==0.3
@@ -32,12 +30,10 @@ itsdangerous==0.24
 Jinja2==2.10
 keyring==17.1.1
 keyrings.alt==3.1.1
-kiwisolver==1.1.0; python_version < '3.8'
-kiwisolver>=1.4.5; python_version >= '3.8'
+kiwisolver==1.1.0
 librosa
 MarkupSafe==1.1.0
-matplotlib==2.2.5; python_version < '3.8'
-matplotlib>=3.7.0,<3.10; python_version >= '3.8'
+matplotlib==2.2.5
 microdotphat==0.2.1
 mock==2.0.0
 mote==0.0.4
@@ -62,8 +58,7 @@ PyGObject
 pyinotify==0.9.6
 PyJWT==1.7.0
 pyOpenSSL==19.0.0
-pyparsing==2.4.7; python_version < '3.8'
-pyparsing>=3.1.2; python_version >= '3.8'
+pyparsing==2.4.7
 pyserial==3.4
 python-dateutil==2.8.2
 pyttsx3==2.7
@@ -79,7 +74,7 @@ scrollphat==0.0.7
 scrollphathd==1.2.1
 SecretStorage==2.3.1
 sense-hat==2.2.0
-setuptools>=65.0.0
+setuptools==40.8.0
 simplejson==3.16.0
 six==1.12.0
 skywriter==0.0.7
@@ -92,4 +87,4 @@ twython==3.7.0
 unicornhathd==0.0.4
 urllib3==1.24.1
 Werkzeug==0.14.1
-wheel>=0.41.0
+wheel==0.32.3
