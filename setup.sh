@@ -46,6 +46,16 @@ sudo apt-get upgrade -y
 # python3 -m pip install librosa --break-system-packages
 # python3 -m pip install pyttsx3 --break-system-packages
 
+sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev libcairo2-dev libgirepository1.0-dev python3-cryptography cython3 python3-numpy python3-pil python3-gi python3-gi-cairo gir1.2-gtk-3.0 libglib2.0-dev gcc pkg-config arandr python3-pygame portaudio19-dev python3-pil.imagetk libttspico-utils apache2 php avahi-daemon
+sudo apt install python3-torch
+sudo apt install python3-omegaconf
+sudo apt install python3-pyaudio
+sudo apt-get install python3-flask-cors
+
+pip3 install --upgrade pip --break-system-packages
+pip3 install librosa --break-system-packages
+pip3 install pyttsx3 --break-system-packages
+
 cd "$REPO_DIR"
 
 # Update pip and setuptools
